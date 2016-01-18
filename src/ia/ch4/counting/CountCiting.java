@@ -1,24 +1,22 @@
 package ia.ch4.counting;
 
-import java.io.IOException;  
-import java.util.ArrayList;  
-import java.util.List;  
-  
-import org.apache.hadoop.conf.Configuration;  
-import org.apache.hadoop.conf.Configured;  
-import org.apache.hadoop.fs.Path;  
-import org.apache.hadoop.io.LongWritable;  
-import org.apache.hadoop.io.Text;  
-import org.apache.hadoop.mapreduce.Job;  
-import org.apache.hadoop.mapreduce.Mapper;  
-import org.apache.hadoop.mapreduce.Reducer;  
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;  
-import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;  
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;  
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;  
-import org.apache.hadoop.util.Tool;  
-import org.apache.hadoop.util.ToolRunner;  
-import org.apache.hadoop.util.StringUtils; 
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
 public class CountCiting extends Configured implements Tool{
 	public static class MapClass extends Mapper<Text, Text, Text, Text> {  
@@ -29,16 +27,21 @@ public class CountCiting extends Configured implements Tool{
         }  
     }  
       
-    public static class Reduce extends Reducer<Text, Text, Text, Text>   
+    public static class Reduce extends Reducer<Text, Text, Text, IntWritable>   
     {  
-        @Override  
+    	@Override  
         public void reduce(Text key, Iterable<Text> values, Context context)  
                 throws IOException, InterruptedException   
         {  
-            // "CITED", "CITING List"  
-            List<String> citingList = new ArrayList<String>();  
-            for(Text citing:values) citingList.add(citing.toString());  
-            context.write(key, new Text(StringUtils.join(",", citingList)));  
+            // "PTN_ID", "CITING_COUNT"  
+            int cnt=0;  
+            Iterator<Text> iter = values.iterator();  
+            while(iter.hasNext())   
+            {  
+                iter.next();  
+                cnt++;  
+            }  
+            context.write(key, new IntWritable(cnt));  
         }  
     }
 	
